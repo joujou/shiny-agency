@@ -58,19 +58,19 @@ const ReplyBox = styled.button`
 `
 
 function Survey() {
+  console.log('enter sur')
   const { questionNumber } = useParams()
   const questionNumberInt = parseInt(questionNumber)
   const prevQuestionNumber = questionNumberInt === 1 ? 1 : questionNumberInt - 1
   const nextQuestionNumber = questionNumberInt + 1
   /* const [surveyData, setSurveyData] = useState({}) */
   /* const [isDataLoading, setDataLoading] = useState(false) */
-  const [error, setError] = useState(false)
+  /* const [error, setError] = useState(false)*/
   const { answers, saveAnswers } = useContext(SurveyContext)
 
   /* Hook perso */
-  const { data, isLoading } = useFetch(`http://localhost:8000/survey`)
-  const { surveyData } = data
-  console.log(data)
+  /*const { data, isLoading, error } = useFetch(`http://localhosts:8000/survey`)
+  const { surveyData } = data*/
 
   /*  useEffect(() => {
     async function fetchSurvey() {
@@ -96,8 +96,8 @@ function Survey() {
 
   const openNotification = (placement, type) => {
     notification[type]({
-      message: 'Vous avez terminé !',
-      description: 'Bravo !!!',
+      message: 'Erreur',
+      description: 'Erreur de chargement des questions',
       placement,
       duration: 4,
       style: {
@@ -113,12 +113,17 @@ function Survey() {
     saveAnswers({ [questionNumber]: answer })
   }
 
+  if(error) {
+    {openNotification('topRight', 'error')}
+  }
+
+  if(isLoading) {
+    <Loader />
+  }
+
   return (
     <SurveyContainer>
       <QuestionTitle>Question {questionNumber}</QuestionTitle>
-      {isLoading ? (
-        <Loader />
-      ) : (
         <>
           <QuestionContent>
             {surveyData && surveyData[questionNumber]}
@@ -139,7 +144,7 @@ function Survey() {
             </ReplyBox>
           </ReplyWrapper>
         </>
-      )}
+      }
 
       <LinkWrapper>
         <Link to={`/survey/${prevQuestionNumber}`}>Précédent</Link>
