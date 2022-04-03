@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import colors from '../../utils/style/colors'
 import { Loader } from '../../utils/style/Atoms'
 import { Button, notification } from 'antd'
-import { SurveyContext } from '../../utils/Context'
+import { SurveyContext } from '../../utils/context'
 
 const SurveyContainer = styled.div`
   display: flex;

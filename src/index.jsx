@@ -10,7 +10,7 @@ import Error from './components/Error'
 import { QueryClientProvider, QueryClient } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import 'antd/dist/antd.css'
-import { SurveyProvider, ThemeProvider } from './utils/Context'
+import { SurveyProvider, ThemeProvider } from './utils/context'
 import Footer from './components/Footer'
 import GlobalStyle from './utils/style/GlobalStyle'
 
