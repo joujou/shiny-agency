@@ -1,14 +1,14 @@
-import {useState, useEffect, useContext} from 'react'
-import {useParams} from 'react-router-dom'
-import {Link} from 'react-router-dom'
+import { useState, useEffect, useContext } from 'react'
+import { useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import colors from '../../utils/style/colors'
-import {Loader} from '../../utils/style/Atoms'
-import {Button, notification, Alert} from 'antd'
-import {SurveyContext} from '../../utils/context'
-import {useFetch} from '../../utils/hooks'
-import {useQuery} from "react-query";
-import axios from 'axios';
+import { Loader } from '../../utils/style/Atoms'
+import { Button, notification, Alert } from 'antd'
+import { SurveyContext } from '../../utils/context'
+import { useFetch } from '../../utils/hooks'
+import { useQuery } from 'react-query'
+import axios from 'axios'
 
 const SurveyContainer = styled.div`
   display: flex;
@@ -60,20 +60,20 @@ const ReplyBox = styled.button`
 `
 
 function Survey() {
-    const {questionNumber} = useParams()
-    const questionNumberInt = parseInt(questionNumber)
-    const prevQuestionNumber = questionNumberInt - 1
-    const nextQuestionNumber = questionNumberInt + 1
-    /* const [surveyData, setSurveyData] = useState({}) */
-    /* const [isDataLoading, setDataLoading] = useState(false) */
-    /* const [error, setError] = useState(false)*/
-    const {answers, saveAnswers} = useContext(SurveyContext)
+  const { questionNumber } = useParams()
+  const questionNumberInt = parseInt(questionNumber)
+  const prevQuestionNumber = questionNumberInt - 1
+  const nextQuestionNumber = questionNumberInt + 1
+  /* const [surveyData, setSurveyData] = useState({}) */
+  /* const [isDataLoading, setDataLoading] = useState(false) */
+  /* const [error, setError] = useState(false)*/
+  const { answers, saveAnswers } = useContext(SurveyContext)
 
-    /* Hook perso */
-    /*const { data, isLoading, error } = useFetch(`http://localhost:8000/survey`)
+  /* Hook perso */
+  /*const { data, isLoading, error } = useFetch(`http://localhost:8000/survey`)
     const { surveyData } = data*/
 
-    /*  useEffect(() => {
+  /*  useEffect(() => {
       async function fetchSurvey() {
         setDataLoading(true)
         try {
@@ -95,89 +95,89 @@ function Survey() {
     }
    */
 
-    useEffect(() => {
-        if(surveyData && !surveyData[questionNumberInt+1]) {
-            {openNotification('topRight', 'info')}
-        }
+  useEffect(() => {
+    if (surveyData && !surveyData[questionNumberInt + 1]) {
+      {
+        openNotification('topRight', 'info')
+      }
+    }
+  })
+  const { data: surveyData, status } = useQuery('survey', async () => {
+    const res = await axios(`http://localhost:8000/survey`)
+    return res['data']['surveyData']
+  })
+
+  const openNotification = (placement, type) => {
+    notification[type]({
+      message: 'Dernière question',
+      description: '',
+      placement,
+      duration: 4,
+      style: {
+        backgroundColor: '#fff',
+      },
+      onClick: () => {
+        console.log('notif clicked')
+      },
     })
-        const {data: surveyData, status} = useQuery('survey', async () => {
-        const res = await axios(`http://localhost:8000/survey`)
-        return res['data']['surveyData'];
-    })
+  }
 
+  const saveReply = (answer) => {
+    saveAnswers({ [questionNumber]: answer })
+  }
 
-    const openNotification = (placement, type) => {
-        notification[type]({
-            message: 'Dernière question',
-            description: '',
-            placement,
-            duration: 4,
-            style: {
-                backgroundColor: '#fff',
-            },
-            onClick: () => {
-                console.log('notif clicked')
-            },
-        })
-    }
+  if (status === 'error') {
+    return <Alert message="Erreur de chargement des questions" type="error" />
+  }
 
-    const saveReply = (answer) => {
-        saveAnswers({[questionNumber]: answer})
-    }
+  if (status === 'loading') {
+    return <Loader />
+  }
 
-    if (status === 'error') {
-       return (<Alert message="Erreur de chargement des questions" type="error" />)
-    }
+  if (status === 'success') {
+    return (
+      <SurveyContainer>
+        <QuestionTitle>Question {questionNumber}</QuestionTitle>
+        <>
+          <QuestionContent>
+            {surveyData && surveyData[questionNumber]}
+          </QuestionContent>
 
-    if (status === 'loading') {
-        return <Loader/>
-    }
+          <ReplyWrapper>
+            <ReplyBox
+              isSelected={answers[questionNumber]}
+              onClick={() => saveReply(true)}
+            >
+              Oui
+            </ReplyBox>
+            <ReplyBox
+              isSelected={answers[questionNumber] === false}
+              onClick={() => saveReply(false)}
+            >
+              Non
+            </ReplyBox>
+          </ReplyWrapper>
+        </>
 
-    if (status === 'success') {
+        <LinkWrapper>
+          {prevQuestionNumber > 0 && (
+            <Link to={`/survey/${prevQuestionNumber}`}>Précédent</Link>
+          )}
 
-        return (
-                <SurveyContainer>
-                <QuestionTitle>Question {questionNumber}</QuestionTitle>
-                <>
-                    <QuestionContent>
-                        {surveyData && surveyData[questionNumber]}
-                    </QuestionContent>
-
-                    <ReplyWrapper>
-                        <ReplyBox
-                            isSelected={answers[questionNumber]}
-                            onClick={() => saveReply(true)}
-                        >
-                            Oui
-                        </ReplyBox>
-                        <ReplyBox
-                            isSelected={answers[questionNumber] === false}
-                            onClick={() => saveReply(false)}
-                        >
-                            Non
-                        </ReplyBox>
-                    </ReplyWrapper>
-                </>
-
-                <LinkWrapper>
-                    {prevQuestionNumber > 0 && <Link to={`/survey/${prevQuestionNumber}`}>Précédent</Link>}
-
-                    {surveyData && surveyData[questionNumberInt + 1] ? (
-                        <Link to={`/survey/${nextQuestionNumber}`}>Suivant</Link>
-                    ) : (
-                        <Link
-                            onClick={() => openNotification('topRight', 'info')}
-                            to="/results"
-                        >
-                            Résultats
-                        </Link>
-                    )}
-                </LinkWrapper>
-            </SurveyContainer>
-        )
-    }
-
-
+          {surveyData && surveyData[questionNumberInt + 1] ? (
+            <Link to={`/survey/${nextQuestionNumber}`}>Suivant</Link>
+          ) : (
+            <Link
+              onClick={() => openNotification('topRight', 'info')}
+              to="/results"
+            >
+              Résultats
+            </Link>
+          )}
+        </LinkWrapper>
+      </SurveyContainer>
+    )
+  }
 }
 
 export default Survey
