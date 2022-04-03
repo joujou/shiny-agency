@@ -126,7 +126,7 @@ function Survey() {
     }
 
     if (status === 'error') {
-       return (<Alert message="Erreur de chargement des données" type="error" />)
+       return (<Alert message="Erreur de chargement des questions" type="error" />)
     }
 
     if (status === 'loading') {
