@@ -136,7 +136,7 @@ function Survey() {
     if (status === 'success') {
 
         return (
-            <SurveyContainer>
+                <SurveyContainer>
                 <QuestionTitle>Question {questionNumber}</QuestionTitle>
                 <>
                     <QuestionContent>
