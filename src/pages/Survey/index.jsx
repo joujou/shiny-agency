@@ -4,9 +4,8 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import colors from '../../utils/style/colors'
 import { Loader } from '../../utils/style/Atoms'
-import { Button, notification, Alert } from 'antd'
+import { message, Alert, notification } from 'antd'
 import { SurveyContext } from '../../utils/context'
-import { useFetch } from '../../utils/hooks'
 import { useQuery } from 'react-query'
 import axios from 'axios'
 
@@ -59,6 +58,8 @@ const ReplyBox = styled.button`
   }
 `
 
+let counter = 0
+
 function Survey() {
   const { questionNumber } = useParams()
   const questionNumberInt = parseInt(questionNumber)
@@ -95,30 +96,35 @@ function Survey() {
     }
    */
 
-  useEffect(() => {
-    if (surveyData && !surveyData[questionNumberInt + 1]) {
-      {
-        openNotification('topRight', 'info')
-      }
+  const {
+    data: surveyData,
+    status,
+    isFetching,
+    isRefetching,
+  } = useQuery(
+    'survey',
+    async () => {
+      const res = await axios(`http://localhost:8000/survey`)
+      return res['data']['surveyData']
+    },
+    {
+      onError: (err) => {
+        message.error('Erreur de chargement')
+        openNotification('topRight', 'error', 'Erreur', 'Pb de chargement')
+      },
     }
-  })
-  const { data: surveyData, status } = useQuery('survey', async () => {
-    const res = await axios(`http://localhost:8000/survey`)
-    return res['data']['surveyData']
-  })
+  )
 
-  const openNotification = (placement, type) => {
+  const openNotification = (placement, type, message, description) => {
     notification[type]({
-      message: 'Dernière question',
-      description: '',
+      message: message,
+      description: description,
       placement,
       duration: 4,
       style: {
         backgroundColor: '#fff',
       },
-      onClick: () => {
-        console.log('notif clicked')
-      },
+      onClick: () => {},
     })
   }
 
@@ -126,38 +132,31 @@ function Survey() {
     saveAnswers({ [questionNumber]: answer })
   }
 
-  if (status === 'error') {
-    return <Alert message="Erreur de chargement des questions" type="error" />
-  }
-
-  if (status === 'loading') {
-    return <Loader />
-  }
-
-  if (status === 'success') {
+  if (surveyData) {
     return (
       <SurveyContainer>
         <QuestionTitle>Question {questionNumber}</QuestionTitle>
-        <>
-          <QuestionContent>
-            {surveyData && surveyData[questionNumber]}
-          </QuestionContent>
+        {!surveyData[nextQuestionNumber] && (
+          <Alert type="error" message="Dernière question" />
+        )}
+        <QuestionContent>
+          {surveyData && surveyData[questionNumber]}
+        </QuestionContent>
 
-          <ReplyWrapper>
-            <ReplyBox
-              isSelected={answers[questionNumber]}
-              onClick={() => saveReply(true)}
-            >
-              Oui
-            </ReplyBox>
-            <ReplyBox
-              isSelected={answers[questionNumber] === false}
-              onClick={() => saveReply(false)}
-            >
-              Non
-            </ReplyBox>
-          </ReplyWrapper>
-        </>
+        <ReplyWrapper>
+          <ReplyBox
+            isSelected={answers[questionNumber]}
+            onClick={() => saveReply(true)}
+          >
+            Oui
+          </ReplyBox>
+          <ReplyBox
+            isSelected={answers[questionNumber] === false}
+            onClick={() => saveReply(false)}
+          >
+            Non
+          </ReplyBox>
+        </ReplyWrapper>
 
         <LinkWrapper>
           {prevQuestionNumber > 0 && (
@@ -167,16 +166,20 @@ function Survey() {
           {surveyData && surveyData[questionNumberInt + 1] ? (
             <Link to={`/survey/${nextQuestionNumber}`}>Suivant</Link>
           ) : (
-            <Link
-              onClick={() => openNotification('topRight', 'info')}
-              to="/results"
-            >
-              Résultats
-            </Link>
+            <Link to="/results">Résultats</Link>
           )}
         </LinkWrapper>
       </SurveyContainer>
     )
+  }
+
+  if (status === 'error') {
+    //return openNotification('topRight', 'error', 'Erreur', 'Erreur chargement')
+    return <Alert message="Erreur de chargement des questions" type="error" />
+  }
+
+  if (status === 'loading') {
+    return <Loader />
   }
 }
 
