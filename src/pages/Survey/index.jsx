@@ -8,6 +8,7 @@ import { message, Alert, notification } from 'antd'
 import { SurveyContext } from '../../utils/context'
 import { useQuery } from 'react-query'
 import axios from 'axios'
+import config from '../../utils/config'
 
 const SurveyContainer = styled.div`
   display: flex;
@@ -58,8 +59,6 @@ const ReplyBox = styled.button`
   }
 `
 
-let counter = 0
-
 function Survey() {
   const { questionNumber } = useParams()
   const questionNumberInt = parseInt(questionNumber)
@@ -104,7 +103,7 @@ function Survey() {
   } = useQuery(
     'survey',
     async () => {
-      const res = await axios(`http://localhost:8000/survey`)
+      const res = await axios(`${config.apiBaseUrl}/survey`)
       return res['data']['surveyData']
     },
     {
@@ -179,7 +178,11 @@ function Survey() {
   }
 
   if (status === 'loading') {
-    return <Loader />
+    return (
+      <SurveyContainer>
+        <Loader />
+      </SurveyContainer>
+    )
   }
 }
 
