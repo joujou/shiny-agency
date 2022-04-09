@@ -28,7 +28,7 @@ const QuestionContent = styled.span`
 const LinkWrapper = styled.div`
   padding-top: 30px;
   & a {
-    color: black;
+    color: red;
   }
   & a:first-of-type {
     margin-right: 20px;

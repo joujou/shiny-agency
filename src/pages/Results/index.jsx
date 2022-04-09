@@ -53,7 +53,7 @@ const LoaderWrapper = styled.div`
   justify-content: center;
 `
 
-function formatFetchParams(answers) {
+function formatQueryParams(answers) {
   const answerNumbers = Object.keys(answers)
 
   return answerNumbers.reduce((previousParams, answerNumber, index) => {
@@ -63,10 +63,18 @@ function formatFetchParams(answers) {
   }, '')
 }
 
+export function formatJobList(title, listLength, index) {
+  if (index === listLength - 1) {
+    return title
+  }
+  return `${title},`
+}
+
 function Results() {
   const { answers } = useContext(SurveyContext)
   const { theme } = useContext(ThemeContext)
-  const queryParams = formatFetchParams(answers)
+  const queryParams = formatQueryParams(answers)
+  /* custom hook useFetch */
   const { isLoading, data, error } = useFetch(
     `${config.apiBaseUrl}/results?${queryParams}`
   )
@@ -88,17 +96,13 @@ function Results() {
   console.log(resultsData)
 
   return (
-    <ResultsContainer theme={theme}>
-      <ResultsTitle theme={theme}>
+    <ResultsContainer>
+      <ResultsTitle>
         Les compétences dont vous avez besoin :
         {resultsData &&
           resultsData.map((result, index) => (
-            <JobTitle
-              key={`result-title-${index}-${result.title}`}
-              theme={theme}
-            >
-              {result.title}
-              {index === resultsData.length - 1 ? '' : ','}
+            <JobTitle key={`result-title-${index}-${result.title}`}>
+              {formatJobList(result.title, resultsData.length, index)}
             </JobTitle>
           ))}
       </ResultsTitle>
@@ -108,11 +112,8 @@ function Results() {
       <DescriptionWrapper>
         {resultsData &&
           resultsData.map((result, index) => (
-            <JobDescription
-              theme={theme}
-              key={`result-detail-${index}-${result.title}`}
-            >
-              <JobTitle theme={theme}>{result.title}</JobTitle>
+            <JobDescription key={`result-detail-${index}-${result.title}`}>
+              <JobTitle>{result.title}</JobTitle>
               <p>{result.description}</p>
             </JobDescription>
           ))}
