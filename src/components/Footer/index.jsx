@@ -23,7 +23,10 @@ function Footer() {
 
   return (
     <FooterContainer>
-      <NightModeButton onClick={() => toggleTheme()}>
+      <NightModeButton
+        data-testid="nightModeButton"
+        onClick={() => toggleTheme()}
+      >
         Changer de mode : {theme === 'light' ? '☀️' : '🌙'}
       </NightModeButton>
     </FooterContainer>
